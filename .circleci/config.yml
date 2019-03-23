@@ -10,7 +10,7 @@ jobs:
           command: find .
       - run:
           name: Restore
-          command: dotnet restore ./MyConsoleApp/MyConsoleApp/MyConsoleApp1.csproj
+          command: dotnet restore ./MyConsoleApp/MyConsoleApp/MyConsoleApp.csproj
       - run:
           name: Build
           command: dotnet build ./MyConsoleApp/MyConsoleApp/MyConsoleApp.csproj
