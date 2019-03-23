@@ -1,4 +1,4 @@
 # MyCiCdTest
-[![Build Status](http://circleci-badges-max.herokuapp.com/img/Mathavana/MyCiCdTest?token=)](https://circleci.com/gh/Mathavana/MyCiCdTest)
+![CircleCI branch](https://img.shields.io/circleci/project/github/Mathavana/MyCiCdTest/master.svg?style=popout)
 
 Example Circleci configuration
