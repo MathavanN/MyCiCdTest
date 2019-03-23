@@ -1,6 +1,6 @@
 FROM microsoft/aspnetcore-build
  
-WORKDIR /app
+WORKDIR /home/app
  
 COPY . .
  
