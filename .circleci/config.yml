@@ -5,7 +5,17 @@ jobs:
       - image: mcr.microsoft.com/dotnet/core/sdk:2.2
     steps:
       - checkout
-      - run: find .
-      - run: dotnet restore ./MyConsoleApp/MyConsoleApp/MyConsoleApp.csproj
-      - run: dotnet build ./MyConsoleApp/MyConsoleApp/MyConsoleApp.csproj
-      - run: dotnet test --no-build ./MyConsoleApp/MyConsoleApp.Test/MyConsoleApp.Test.csproj
+      - run:
+          name: Find
+          command: find .
+      - run:
+          name: Restore
+          command: dotnet restore ./MyConsoleApp/MyConsoleApp/MyConsoleApp.csproj
+      - run:
+          name: Build
+          command: dotnet build ./MyConsoleApp/MyConsoleApp/MyConsoleApp.csproj
+      - run:
+          name: Test
+          command: dotnet test ./MyConsoleApp/MyConsoleApp.Test/MyConsoleApp.Test.csproj
+      - store_artifacts:
+          path: coverage
