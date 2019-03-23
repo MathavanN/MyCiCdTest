@@ -1,1 +1,2 @@
 # MyCiCdTest
+Example Circleci configuration
