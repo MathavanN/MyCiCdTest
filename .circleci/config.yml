@@ -8,4 +8,4 @@ jobs:
       - run: find .
       - run: dotnet restore ./MyConsoleApp/MyConsoleApp/MyConsoleApp.csproj
       - run: dotnet build ./MyConsoleApp/MyConsoleApp/MyConsoleApp.csproj
-      - run: dotnet test --no-build MyConsoleApp.Test
+      - run: dotnet test --no-build ./MyConsoleApp/MyConsoleApp.Test/MyConsoleApp.Test.csproj
