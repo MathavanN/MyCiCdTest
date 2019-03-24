@@ -11,8 +11,10 @@ namespace MyConsoleApp
     {
         public static void Main()
         {
-            var result = new MyProgram().Get(5, 5);
-            Console.WriteLine(result);
+            var a = 5;
+            var b = 6;
+            var result = new MyProgram().Get(a, b);
+            Console.WriteLine($"Result of Get({a}, {b}) is {result}");
         }
     }
 }

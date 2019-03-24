@@ -5,9 +5,13 @@ namespace MyConsoleApp.Test
     public class MyProgramTest
     {
         [Fact]
-        public void Test1()
+        public void VerifyGet()
         {
-            Assert.Equal("42", new MyProgram().Get(19, 23));
+            const int intFirstNumber = 19;
+            const int intsecondNumber = 23;
+            var objTargetClass = new MyProgram();
+            var result = objTargetClass.Get(intFirstNumber, intsecondNumber);
+            Assert.Equal("42", result);
         }
     }
 }
