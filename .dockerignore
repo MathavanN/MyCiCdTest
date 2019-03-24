@@ -1,7 +1,12 @@
+# directories
 **/bin/
 **/obj/
-**/global.json
-**/Dockerfile*
-**/.dockerignore*
-**/*.user
+**/out/
 
+# files
+Dockerfile*
+**/*.trx
+**/*.md
+**/*.ps1
+**/*.cmd
+**/*.sh
