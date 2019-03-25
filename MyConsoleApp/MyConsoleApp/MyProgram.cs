@@ -11,7 +11,7 @@ namespace MyConsoleApp
     {
         public static void Main()
         {
-            var a = 5;
+            var a = 6;
             var b = 6;
             var result = new MyProgram().Get(a, b);
             Console.WriteLine($"Result of Get({a}, {b}) is {result}");
