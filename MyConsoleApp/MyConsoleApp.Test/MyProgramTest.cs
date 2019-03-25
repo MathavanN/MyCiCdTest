@@ -7,11 +7,11 @@ namespace MyConsoleApp.Test
         [Fact]
         public void VerifyGet()
         {
-            const int intFirstNumber = 19;
-            const int intsecondNumber = 23;
+            const int firstNumber = 19;
+            const int secondNumber = 23;
             var objTargetClass = new MyProgram();
-            var result = objTargetClass.Get(intFirstNumber, intsecondNumber);
-            Assert.Equal("42", result);
+            var result = objTargetClass.Add(firstNumber, secondNumber);
+            Assert.Equal((firstNumber + secondNumber), result);
         }
     }
 }
