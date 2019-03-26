@@ -7,3 +7,5 @@
 
 
 Example Circleci configuration
+
+Testing branch rules
