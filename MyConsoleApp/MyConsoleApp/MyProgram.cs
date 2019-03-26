@@ -4,7 +4,7 @@ namespace MyConsoleApp
 {
     public class MyProgram
     {
-        public int Add(int a, int b) => a + b;
+        public int Add(int aa, int b) => aa + b;
     }
 
     public class Program
