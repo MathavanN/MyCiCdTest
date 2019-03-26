@@ -7,7 +7,7 @@ Example Circleci configuration
 
 ## PR Steps
 - build-status branch created for raise PR
-- repo owner verify the build staus resut from Circlci, Docker
+- repo owner verify the build staus resut from Circlci, Docker and perform code review
 - if anything goes wrong, notify the PR onwer
 - if everything Ok, Merge from build-status to develop
 - Create new PR from develop to master branch
