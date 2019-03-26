@@ -4,7 +4,8 @@ namespace MyConsoleApp
 {
     public class MyProgram
     {
-        public int Add(int aa, int b) => aa + b;
+        public int Add(int a, int b) => a + b;
+        public int Sub(int a, int b) => a - b;
     }
 
     public class Program
@@ -17,6 +18,9 @@ namespace MyConsoleApp
             var b = Convert.ToInt32(Console.ReadLine().ToString());
             var result = new MyProgram().Add(a, b);
             Console.WriteLine($"Result of Add({a}, {b}) is {result}");
+
+            result = new MyProgram().Sub(a, b);
+            Console.WriteLine($"Result of Sub({a}, {b}) is {result}");
         }
     }
 }
