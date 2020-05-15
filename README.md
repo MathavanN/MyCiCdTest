@@ -8,6 +8,6 @@
 
 [![Coverage Status](https://coveralls.io/repos/github/MathavanN/MyCiCdTest/badge.svg)](https://coveralls.io/github/MathavanN/MyCiCdTest)
 
-Example Circleci configuration
+Example GitHub actions configuration, setup Coveralls.io
 
 Testing branch rules
