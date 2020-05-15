@@ -6,9 +6,7 @@
 
 ![Docker Image CI](https://github.com/MathavanN/MyCiCdTest/workflows/Docker%20Image%20CI/badge.svg)
 
-Master: [![Coverage Status](https://coveralls.io/repos/github/MathavanN/MyCiCdTest/badge.svg?branch=master)](https://coveralls.io/github/MathavanN/MyCiCdTest?branch=master)
-
-Develop: [![Coverage Status](https://coveralls.io/repos/github/MathavanN/MyCiCdTest/badge.svg?branch=develop)](https://coveralls.io/github/MathavanN/MyCiCdTest?branch=develop)
+[![Coverage Status](https://coveralls.io/repos/github/MathavanN/MyCiCdTest/badge.svg)](https://coveralls.io/github/MathavanN/MyCiCdTest)
 
 Example GitHub actions configuration, setup Coveralls.io
 
