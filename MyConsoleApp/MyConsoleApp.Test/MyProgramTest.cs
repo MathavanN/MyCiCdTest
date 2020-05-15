@@ -23,5 +23,15 @@ namespace MyConsoleApp.Test
             var result = objTargetClass.Add(firstNumber, secondNumber);
             Assert.Equal(-7, result);
         }
+
+        [Fact]
+        public void Subtract_10_And_3_Should_Return_7()
+        {
+            const int firstNumber = 10;
+            const int secondNumber = 3;
+            var objTargetClass = new MyProgram();
+            var result = objTargetClass.Sub(firstNumber, secondNumber);
+            Assert.Equal(7, result);
+        }
     }
 }
