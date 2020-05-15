@@ -6,6 +6,8 @@
 
 ![Docker Image CI](https://github.com/MathavanN/MyCiCdTest/workflows/Docker%20Image%20CI/badge.svg)
 
+[![Coverage Status](https://coveralls.io/repos/github/MathavanN/MyCiCdTest/badge.svg?branch=develop)](https://coveralls.io/github/MathavanN/MyCiCdTest?branch=develop)
+
 Example Circleci configuration
 
 Testing branch rules
