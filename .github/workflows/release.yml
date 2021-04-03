@@ -41,12 +41,12 @@ jobs:
     - name: Get Tag
       id: test
       run: |
-        echo ::set-output name=TETS_TAG::${{ github.ref }}
+        echo ::set-output name=TEST_TAG::${{ github.ref }}
     - name: Print Tag
       env: 
-        TETS_TAG: ${{ setps.test.outputs.TETS_TAG }}
+        TEST_TAG: ${{ steps.test.outputs.TEST_TAG }}
       run: |
-        echo $TETS_TAG
+        echo $TEST_TAG
     - name: Setup Version ID
       run: |
         VERSION=`git describe --abbrev=0` ; echo "VERSION=$VERSION" >> $GITHUB_ENV
