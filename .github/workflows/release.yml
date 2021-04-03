@@ -7,7 +7,8 @@ on:
   # Triggers the workflow on push or pull request events but only for the develop branch
   push:
     tags:
-      - 'v*.*.*'
+      - v[0-9]+.[0-9]+.[0-9]+
+      - v[0-9]+.[0-9]+.[0-9]+-*
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -20,6 +21,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
     - uses: actions/checkout@v2
     - name: Set output
       id: branch_name
@@ -36,10 +38,15 @@ jobs:
         echo $SOURCE_NAME
         echo $SOURCE_BRANCH
         echo $SOURCE_TAG
-    - name: Check if Git tag exists
-      run: echo "::set-env name=HEAD_TAG::$(git tag --points-at HEAD)"
-    - name: Runs only if Git tag exists
-      run: echo"This runs because Git tag points at HEAD ..."
+    - name: Get Tag
+      id: test
+      run: |
+        echo ::set-output name=TETS_TAG::${{ github.ref }}
+    - name: Print Tag
+      env: 
+        TETS_TAG: ${{ setps.test.outputs.TETS_TAG }}
+      run: |
+        echo $TETS_TAG
     - name: Setup Version ID
       run: |
         VERSION=`git describe --abbrev=0` ; echo "VERSION=$VERSION" >> $GITHUB_ENV
