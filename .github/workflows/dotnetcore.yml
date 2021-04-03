@@ -9,17 +9,23 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+       os: [ubuntu-latest, windows-latest, macOS-latest]
 
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 2.2.103
+        dotnet-version: 5.0.x
     - name: Install dependencies
-      run: dotnet restore ./MyConsoleApp/MyConsoleApp/MyConsoleApp.csproj
+      run: dotnet restore
+      working-directory: MyConsoleApp
     - name: Build
-      run: dotnet build ./MyConsoleApp/MyConsoleApp/MyConsoleApp.csproj --configuration Release --no-restore
+      run: dotnet build --configuration Release --no-restore
+      working-directory: MyConsoleApp
     - name: Test
-      run: dotnet test ./MyConsoleApp/MyConsoleApp.Test/MyConsoleApp.Test.csproj --no-restore --verbosity normal
+      run: dotnet test --no-restore --verbosity normal
+      working-directory: MyConsoleApp
