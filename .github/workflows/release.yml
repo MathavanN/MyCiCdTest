@@ -32,12 +32,16 @@ jobs:
         dotnet-version: 5.0.x
     - name: Install dependencies
       run: dotnet restore
+      working-directory: MyConsoleApp
     - name: Build
       run: dotnet build -property:Version=$VERSION --configuration Release --no-restore
+      working-directory: MyConsoleApp
     - name: Test
       run: dotnet test --no-restore --verbosity normal
+      working-directory: MyConsoleApp
     - name: Publish
       run: dotnet publish --no-build --configuration Release -o publish MyConsoleApp
+      working-directory: MyConsoleApp
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
       with:
