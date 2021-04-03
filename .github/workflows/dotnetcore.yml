@@ -18,8 +18,8 @@ jobs:
       with:
         dotnet-version: 2.2.103
     - name: Install dependencies
-      run: dotnet restore ./MyConsoleApp/MyConsoleApp/MyConsoleApp.csproj
+      run: dotnet restore
     - name: Build
-      run: dotnet build ./MyConsoleApp/MyConsoleApp/MyConsoleApp.csproj --configuration Release --no-restore
+      run: dotnet build --configuration Release --no-restore
     - name: Test
-      run: dotnet test ./MyConsoleApp/MyConsoleApp.Test/MyConsoleApp.Test.csproj --no-restore --verbosity normal
+      run: dotnet test --no-restore --verbosity normal
