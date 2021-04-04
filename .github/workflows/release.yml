@@ -104,3 +104,4 @@ jobs:
           asset_path: MyConsoleApp-${{ matrix.os }}-v${{ needs.once.outputs.new_tag }}.zip
           asset_name: MyConsoleApp-${{ matrix.os }}-v${{ needs.once.outputs.new_tag }}.zip
           asset_content_type: application/octet-stream
+        working-directory: ${{env.working-directory}}
