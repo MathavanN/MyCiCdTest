@@ -29,7 +29,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
         RELEASE_BRANCHES: master
         TAG_CONTEXT: branch
-        DEFAULT_BUMP: minor
+        DEFAULT_BUMP: patch
         WITH_V: false
     - name: Create a GitHub release
       uses: actions/create-release@v1
@@ -51,7 +51,7 @@ jobs:
         echo $PART
     - name: Setup Version ID
       run: |
-        VERSION=${{ steps.tag_version.outputs.new_tag }}.`git rev-parse --short HEAD`" ; echo "VERSION=$VERSION" >> $GITHUB_ENV
+        VERSION="${{ steps.tag_version.outputs.new_tag }}.`git rev-parse --short HEAD`" ; echo "VERSION=$VERSION" >> $GITHUB_ENV
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
