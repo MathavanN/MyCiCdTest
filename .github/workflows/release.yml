@@ -23,30 +23,11 @@ jobs:
     steps:
 
     - uses: actions/checkout@v2
-    - name: Set output
-      id: branch_name
-      run: |
-        echo ::set-output name=SOURCE_NAME::${GITHUB_REF#refs/*/}
-        echo ::set-output name=SOURCE_BRANCH::${GITHUB_REF#refs/heads/}
-        echo ::set-output name=SOURCE_TAG::${GITHUB_REF#refs/tags/v}
-    - name: Check output
-      env:
-        SOURCE_NAME: ${{ steps.branch_name.outputs.SOURCE_NAME }}
-        SOURCE_BRANCH: ${{ steps.branch_name.outputs.SOURCE_BRANCH }}
-        SOURCE_TAG: ${{ steps.branch_name.outputs.SOURCE_TAG }}
-      run: |
-        echo $SOURCE_NAME
-        echo $SOURCE_BRANCH
-        echo $SOURCE_TAG
-    - name: Get Tag
-      id: test
-      run: |
-        echo ::set-output name=TEST_TAG::${{ github.ref }}
-    - name: Print Tag
-      env: 
-        TEST_TAG: ${{ steps.test.outputs.TEST_TAG }}
-      run: |
-        echo $TEST_TAG
+    - name: Get tag
+      id: tag
+      uses: dawidd6/action-get-tag@v1
+    - name: Use tag
+      run: echo ${{steps.tag.outputs.tag}}
     - name: Setup Version ID
       run: |
         VERSION=`git describe --abbrev=0` ; echo "VERSION=$VERSION" >> $GITHUB_ENV
