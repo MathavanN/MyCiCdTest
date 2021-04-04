@@ -49,6 +49,9 @@ jobs:
         echo $NEW_TAG
         echo $TAG
         echo $PART
+    - name: Setup Version ID
+      run: |
+        VERSION=${{ steps.tag_version.outputs.new_tag }}.`git rev-parse --short HEAD`" ; echo "VERSION=$VERSION" >> $GITHUB_ENV
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
@@ -71,6 +74,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./bin/azblogfilter.linux-amd64.tar.gz
-        asset_name: azblogfilter.linux-amd64.tar.gz
+        asset_path: ./MyConsoleApp/publish
+        asset_name: MyConsoleApp.linux-amd64.tar.gz
         asset_content_type: application/gzip
