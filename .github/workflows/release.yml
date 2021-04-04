@@ -91,6 +91,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
         with:
           upload_url: ${{ needs.once.outputs.upload_url }}
-          asset_path: ./
+          asset_path: MyConsoleApp/MyConsoleApp-${{ matrix.os }}-v${{ needs.once.outputs.new_tag }}.zip
           asset_name: MyConsoleApp-${{ matrix.os }}-${{ needs.once.outputs.new_tag }}.zip
           asset_content_type: application/octet-stream
