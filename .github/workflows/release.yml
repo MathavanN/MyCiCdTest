@@ -6,6 +6,8 @@ name: Release
 on:
   # Triggers the workflow on push or pull request events but only for the develop branch
   push:
+    branches:
+      - master
     tags:
       - v[0-9]+.[0-9]+.[0-9]+
       - v[0-9]+.[0-9]+.[0-9]+-*
