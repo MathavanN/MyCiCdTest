@@ -5,7 +5,7 @@ name: Build and Release
 # Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the develop branch
-  push:
+  pull_request:
     branches:
       - master
 
@@ -63,7 +63,7 @@ jobs:
       version: ${{ needs.once.outputs.new_tag }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-latest, macos-latest]
     steps:
       - uses: actions/checkout@v2
       - name: Setup .NET Core
