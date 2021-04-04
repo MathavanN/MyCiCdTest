@@ -23,11 +23,10 @@ jobs:
     steps:
 
     - uses: actions/checkout@v2
-    - name: Get tag
-      id: tag
-      uses: dawidd6/action-get-tag@v1
-    - name: Use tag
-      run: echo ${{steps.tag.outputs.tag}}
+    - run: |
+          git fetch --unshallow --tags
+          echo $?
+          git tag --list
     - name: Setup Version ID
       run: |
         VERSION=`git describe --abbrev=0` ; echo "VERSION=$VERSION" >> $GITHUB_ENV
