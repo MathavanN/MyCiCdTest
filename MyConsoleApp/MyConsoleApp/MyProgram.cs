@@ -6,6 +6,7 @@ namespace MyConsoleApp
     {
         public int Add(int a, int b) => a + b;
         public int Sub(int a, int b) => a - b;
+        public int Multiplication(int a, int b) => a * b;
     }
 
     public class Program
@@ -20,6 +21,9 @@ namespace MyConsoleApp
             Console.WriteLine($"Result of Add({a}, {b}) is {result}");
 
             result = new MyProgram().Sub(a, b);
+            Console.WriteLine($"Result of Sub({a}, {b}) is {result}");
+
+            result = new MyProgram().Multiplication(a, b);
             Console.WriteLine($"Result of Sub({a}, {b}) is {result}");
 
             Console.ReadKey();
