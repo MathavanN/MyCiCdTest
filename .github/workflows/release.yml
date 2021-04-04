@@ -86,7 +86,7 @@ jobs:
       - name: Zip the asset into a zip file
         id: zip_asset
         run: |
-          7z a -tzip /Release/MyConsoleApp-${{ matrix.os }}-v${{ needs.once.outputs.new_tag }}.zip ./Release*
+          7z a -tzip MyConsoleApp-${{ matrix.os }}-v${{ needs.once.outputs.new_tag }}.zip ./Release/*
       
       - name: List all files
         run: |
