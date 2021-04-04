@@ -60,8 +60,8 @@ jobs:
       run: dotnet restore
       working-directory: MyConsoleApp
     - name: Build
+      run: dotnet build -property:Version=$VERSION--configuration Release --no-restore MyConsoleApp
       working-directory: MyConsoleApp
-      run: dotnet build -property:Version=$VERSION--configuration Release --no-restore
     - name: Test
       run: dotnet test --no-restore --verbosity normal
       working-directory: MyConsoleApp
