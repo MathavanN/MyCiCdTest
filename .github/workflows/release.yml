@@ -1,49 +1,106 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Release
+name: Build and Release
 
-# Controls when the action will run. 
+# Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the develop branch
-  push:
-    branches: [ main ]
+  pull_request:
+    branches:
+      - master
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
+  once:
+    name: Create single release for all build_release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      new_tag: ${{ steps.tag_version.outputs.new_tag }}
+      previous_tag: ${{ steps.tag_version.outputs.tag }}
+      tag_part: ${{ steps.tag_version.outputs.part }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
+      - name: Create a tag
+        id: tag_version
+        uses: anothrNick/github-tag-action@1.35.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+          RELEASE_BRANCHES: master
+          TAG_CONTEXT: branch
+          DEFAULT_BUMP: patch
+          WITH_V: false
+      - name: Create a GitHub release
+        uses: actions/create-release@v1
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+        with:
+          tag_name: ${{ steps.tag_version.outputs.new_tag }}
+          release_name: Release v${{ steps.tag_version.outputs.new_tag }}
+          body: CHANGELOG.md
+      - name: Print Tag Version
+        env:
+          NEW_TAG: ${{ steps.tag_version.outputs.new_tag }}
+          TAG: ${{ steps.tag_version.outputs.tag }}
+          PART: ${{ steps.tag_version.outputs.part }}
+        run: |
+          echo $NEW_TAG
+          echo $TAG
+          echo $PART
+
   build:
-    # The type of runner that the job will run on
+    name: Create cross-platform release builds, and upload binaries
+    needs: once
     runs-on: ${{ matrix.os }}
+    env:
+      working-directory: MyConsoleApp
+      version: ${{ needs.once.outputs.new_tag }}
     strategy:
       matrix:
-       os: [ubuntu-latest, windows-latest, macOS-latest]
-
+        os: [windows-latest, ubuntu-latest, macos-latest]
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup Version ID
-      run: |
-        VERSION=`git describe --abbrev=0` || VERSION="0.0.0-SNAPSHOT-`git rev-parse --short HEAD`" ; echo "VERSION=$VERSION" >> $GITHUB_ENV
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 5.0.x
-    - name: Install dependencies
-      run: dotnet restore
-      working-directory: MyConsoleApp
-    - name: Build
-      run: dotnet build -property:Version=$VERSION --configuration Release --no-restore
-      working-directory: MyConsoleApp
-    - name: Test
-      run: dotnet test --no-restore --verbosity normal
-      working-directory: MyConsoleApp
-    - name: Publish
-      run: dotnet publish --no-build --configuration Release -o publish MyConsoleApp
-      working-directory: MyConsoleApp
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: MyConsoleApp-${{ env.VERSION }}
-        path: publish
+      - uses: actions/checkout@v2
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+      - name: Install dependencies
+        run: dotnet restore
+        working-directory: ${{env.working-directory}}
+      - name: Build
+        run: dotnet build -property:Version=${{ env.version }} --configuration Release --no-restore
+        working-directory: ${{env.working-directory}}
+      - name: Test
+        run: dotnet test --no-restore --verbosity normal
+        working-directory: ${{env.working-directory}}
+      - name: Publish
+        run: dotnet publish --no-build --configuration Release -o Release MyConsoleApp
+        working-directory: ${{env.working-directory}}
+
+      
+      - name: Zip the asset into a zip file
+        id: zip_asset
+        run: |
+          7z a -tzip MyConsoleApp-${{ matrix.os }}-v${{ needs.once.outputs.new_tag }}.zip Release*
+        working-directory: ${{env.working-directory}}
+      
+      - name: List all files
+        run: |
+          ls -R
+        working-directory: ${{env.working-directory}}
+
+      - name: Upload binaries to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+        with:
+          upload_url: ${{ needs.once.outputs.upload_url }}
+          asset_path: ${{env.working-directory}}/MyConsoleApp-${{ matrix.os }}-v${{ needs.once.outputs.new_tag }}.zip
+          asset_name: MyConsoleApp-${{ matrix.os }}-v${{ needs.once.outputs.new_tag }}.zip
+          asset_content_type: application/octet-stream
