@@ -2,7 +2,7 @@
 
 name: Bump Version
 
-# Controls when the action will run. 
+# Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the develop branch
   push:
@@ -14,66 +14,82 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build_release:
-    # The type of runner that the job will run on
+  once:
+    name: Create single release for all build_release
     runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      new_tag: ${{ steps.tag_version.outputs.new_tag }}
+      previous_tag: ${{ steps.tag_version.outputs.tag }}
+      tag_part: ${{ steps.tag_version.outputs.part }}
     steps:
-    - uses: actions/checkout@v2
-      with: 
-        fetch-depth: '0'
-    - name: Bump Version and Push Tag
-      id: tag_version
-      uses: anothrNick/github-tag-action@1.35.0
-      env:
-        GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
-        RELEASE_BRANCHES: master
-        TAG_CONTEXT: branch
-        DEFAULT_BUMP: patch
-        WITH_V: false
-    - name: Create a GitHub release
-      uses: actions/create-release@v1
-      id: create_release
-      env:
-        GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
-      with:
-        tag_name: ${{ steps.tag_version.outputs.new_tag }}
-        release_name: Release v${{ steps.tag_version.outputs.new_tag }}
-        body: CHANGELOG.md
-    - name: Print Version
-      env:
-        NEW_TAG: ${{ steps.tag_version.outputs.new_tag }}
-        TAG: ${{ steps.tag_version.outputs.tag }}
-        PART: ${{ steps.tag_version.outputs.part }}
-      run: |
-        echo $NEW_TAG
-        echo $TAG
-        echo $PART
-    - name: Setup Version ID
-      run: |
-        VERSION="${{ steps.tag_version.outputs.new_tag }}" ; echo "VERSION=$VERSION" >> $GITHUB_ENV
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 5.0.x
-    - name: Install dependencies
-      run: dotnet restore
-      working-directory: MyConsoleApp
-    - name: Build
-      run: dotnet build -property:Version=$VERSION --configuration Release --no-restore
-      working-directory: MyConsoleApp
-    - name: Test
-      run: dotnet test --no-restore --verbosity normal
-      working-directory: MyConsoleApp
-    - name: Publish
-      run: dotnet publish --no-build --configuration Release -o publish MyConsoleApp
-      working-directory: MyConsoleApp
-    - name: upload linux artifact
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./MyConsoleApp/publish
-        asset_name: MyConsoleApp.linux-amd64.tar.gz
-        asset_content_type: application/gzip
+      - name: Create a tag
+        id: tag_version
+        uses: anothrNick/github-tag-action@1.35.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+          RELEASE_BRANCHES: master
+          TAG_CONTEXT: branch
+          DEFAULT_BUMP: patch
+          WITH_V: false
+      - name: Create a GitHub release
+        uses: actions/create-release@v1
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+        with:
+          tag_name: ${{ steps.tag_version.outputs.new_tag }}
+          release_name: Release v${{ steps.tag_version.outputs.new_tag }}
+          body: CHANGELOG.md
+      - name: Print Tag Version
+        env:
+          NEW_TAG: ${{ steps.tag_version.outputs.new_tag }}
+          TAG: ${{ steps.tag_version.outputs.tag }}
+          PART: ${{ steps.tag_version.outputs.part }}
+        run: |
+          echo $NEW_TAG
+          echo $TAG
+          echo $PART
+
+  build:
+    name: Create cross-platform release builds, and upload binaries
+    needs: once
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+      - name: Install dependencies
+        run: dotnet restore
+        working-directory: MyConsoleApp
+      - name: Build
+        run: dotnet build -property:Version=${{ needs.once.outputs.new_tag }} --configuration Release --no-restore
+        working-directory: MyConsoleApp
+      - name: Test
+        run: dotnet test --no-restore --verbosity normal
+        working-directory: MyConsoleApp
+      - name: Publish
+        run: dotnet publish --no-build --configuration Release -o Release MyConsoleApp
+        working-directory: MyConsoleApp
+
+      - name: Zip the asset into a zip file
+        id: zip_asset
+        run: |
+          7z a -tzip ${{ github.workspace }}/Release/MyConsoleApp-${{ matrix.os }}-v${{ needs.once.outputs.new_tag }}.zip ${{ github.workspace }}/Release/MyConsoleApp*
+      
+      - name: Upload binaries to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+        with:
+          upload_url: ${{ needs.once.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/Release/MyConsoleApp-${{ matrix.os }}-${{ needs.once.outputs.new_tag }}.zip
+          asset_name: MyConsoleApp-${{ matrix.os }}-${{ needs.once.outputs.new_tag }}.zip
+          asset_content_type: application/octet-stream
