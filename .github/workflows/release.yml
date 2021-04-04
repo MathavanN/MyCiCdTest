@@ -23,9 +23,12 @@ jobs:
       with: 
         fetch-depth: '0'
     - name: Bump Version and Push Tag
-      uses: anothrNick/github-tag-action@1.17.2
+      uses: anothrNick/github-tag-action@1.35.0
       env:
         GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
         TAG_CONTEXT: branch
         DEFAULT_BUMP: minor
         WITH_V: false
+    - name: Setup Version ID
+      run: |
+        VERSION=`git describe --abbrev=0` || VERSION="0.0.0-SNAPSHOT-`git rev-parse --short HEAD`" ; echo "VERSION=$VERSION" >> $GITHUB_ENV
