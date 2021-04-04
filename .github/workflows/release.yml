@@ -15,7 +15,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  release:
+  build_release:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     steps:
@@ -29,8 +29,17 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
         RELEASE_BRANCHES: master
         TAG_CONTEXT: branch
-        DEFAULT_BUMP: patch
+        DEFAULT_BUMP: minor
         WITH_V: false
+    - name: Create a GitHub release
+      uses: actions/create-release@v1
+      id: create_release
+      env:
+        GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+      with:
+        tag_name: ${{ steps.tag_version.outputs.new_tag }}
+        release_name: Release v${{ steps.tag_version.outputs.new_tag }}
+        body: CHANGELOG.md
     - name: Print Version
       env:
         NEW_TAG: ${{ steps.tag_version.outputs.new_tag }}
@@ -40,3 +49,28 @@ jobs:
         echo $NEW_TAG
         echo $TAG
         echo $PART
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+    - name: Install dependencies
+      run: dotnet restore
+      working-directory: MyConsoleApp
+    - name: Build
+      run: dotnet build -property:Version=$NEW_TAG --configuration Release --no-restore
+      working-directory: MyConsoleApp
+    - name: Test
+      run: dotnet test --no-restore --verbosity normal
+      working-directory: MyConsoleApp
+    - name: Publish
+      run: dotnet publish --no-build --configuration Release -o publish MyConsoleApp
+      working-directory: MyConsoleApp
+    - name: upload linux artifact
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./bin/azblogfilter.linux-amd64.tar.gz
+        asset_name: azblogfilter.linux-amd64.tar.gz
+        asset_content_type: application/gzip
