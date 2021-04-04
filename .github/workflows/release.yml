@@ -58,6 +58,9 @@ jobs:
     name: Create cross-platform release builds, and upload binaries
     needs: once
     runs-on: ${{ matrix.os }}
+    env:
+      working-directory: MyConsoleApp
+      version: ${{ needs.once.outputs.new_tag }}
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest]
@@ -69,22 +72,26 @@ jobs:
           dotnet-version: 5.0.x
       - name: Install dependencies
         run: dotnet restore
-        working-directory: MyConsoleApp
+        working-directory: ${{env.working-directory}}
       - name: Build
-        run: dotnet build -property:Version=${{ needs.once.outputs.new_tag }} --configuration Release --no-restore
-        working-directory: MyConsoleApp
+        run: dotnet build -property:Version=${{ env.version }} --configuration Release --no-restore
+        working-directory: ${{env.working-directory}}
       - name: Test
         run: dotnet test --no-restore --verbosity normal
-        working-directory: MyConsoleApp
+        working-directory: ${{env.working-directory}}
       - name: Publish
         run: dotnet publish --no-build --configuration Release -o Release MyConsoleApp
-        working-directory: MyConsoleApp
+        working-directory: ${{env.working-directory}}
 
       - name: Zip the asset into a zip file
         id: zip_asset
         run: |
           7z a -tzip MyConsoleApp-${{ matrix.os }}-v${{ needs.once.outputs.new_tag }}.zip ./Release*
       
+      - name: List all files
+        run: |
+          ls -R
+        working-directory: ${{env.working-directory}}
       - name: Upload binaries to release
         uses: actions/upload-release-asset@v1
         env:
