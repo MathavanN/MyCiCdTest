@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Release
+name: Bump Version
 
 # Controls when the action will run. 
 on:
@@ -8,9 +8,6 @@ on:
   push:
     branches:
       - master
-    tags:
-      - v[0-9]+.[0-9]+.[0-9]+
-      - v[0-9]+.[0-9]+.[0-9]+-*
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -21,35 +18,14 @@ jobs:
   release:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
     steps:
-
     - uses: actions/checkout@v2
-    - run: |
-          git fetch --unshallow --tags
-          echo $?
-          git tag --list
-    - name: Setup Version ID
-      run: |
-        VERSION=`git describe --abbrev=0` ; echo "VERSION=$VERSION" >> $GITHUB_ENV
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 5.0.x
-    - name: Install dependencies
-      run: dotnet restore
-      working-directory: MyConsoleApp
-    - name: Build
-      run: dotnet build -property:Version=$VERSION --configuration Release --no-restore
-      working-directory: MyConsoleApp
-    - name: Test
-      run: dotnet test --no-restore --verbosity normal
-      working-directory: MyConsoleApp
-    - name: Publish
-      run: dotnet publish --no-build --configuration Release -o publish MyConsoleApp
-      working-directory: MyConsoleApp
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: MyConsoleApp-${{ env.VERSION }}
-        path: MyConsoleApp/publish
+      with: 
+        fetch-depth: '0'
+    - name: Bump Version and Push Tag
+      uses: anothrNick/github-tag-action@1.17.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+        TAG_CONTEXT: branch
+        DEFAULT_BUMP: minor
+        WITH_V: false
