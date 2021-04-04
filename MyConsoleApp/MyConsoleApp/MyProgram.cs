@@ -21,6 +21,8 @@ namespace MyConsoleApp
 
             result = new MyProgram().Sub(a, b);
             Console.WriteLine($"Result of Sub({a}, {b}) is {result}");
+
+            Console.ReadKey();
         }
     }
 }
