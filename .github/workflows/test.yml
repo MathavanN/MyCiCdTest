@@ -29,13 +29,14 @@ jobs:
           export tag_minor=minor
           export tag_patch=patch
           export default_semvar_bump=${tag_patch}
-          export vith_v=false
-          export release_branchaes=master
+          export with_v=false
+          export release_branches=master
 
           echo '*** Configuration ****'
-          echo "\tDEFAULT_BUMP: ${default_semvar_bump}"
-          echo "\tWITH_V: ${with_v}"
-          echo "\tRELEASE_BRANCHES: ${release_branches}"
+          echo "DEFAULT_BUMP: ${default_semvar_bump}"
+          echo "WITH_V: ${with_v}"
+          echo "RELEASE_BRANCHES: ${release_branches}"
+          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
 
           export current_branch=$(git rev-parse -abbrev-ref HEAD)
 
