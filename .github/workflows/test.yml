@@ -12,22 +12,34 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  build:
+  once:
+    if: >
+      ${{github.event.pull_request.merged == true &&
+      contains(github.event.pull_request.labels.*.name, 'safe to release') }}
+    name: Create single release for all build_release
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
+        with:
+          fetch-depth: '0'
       - name: Run a multi-line script
         run: |
+          tag_major = major
+          tag_minor = minor
+          tag_patch = patch
+          default_semvar_bump = ${tag_patch}
+          vith_v = false
+          release_branchaes = master
+
+          echo '*** Configuration ****'
+          echo "\tDEFAULT_BUMP: ${default_semvar_bump}"
+          echo "\tWITH_V: ${with_v}"
+          echo "\tRELEASE_BRANCHES: ${release_branches}"
+
+          current_branch = $(git rev-parse -abbrev-ref HEAD)
+
+          echo "\t Current Branch: ${current_branch}"
           echo ${{ github.event.number }},
           echo ${{ github.event.workflow_run.event }},
           echo ${{ github.event.pull_request.labels.*.name }},
