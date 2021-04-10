@@ -42,10 +42,10 @@ jobs:
     needs: check
     env:
       working-directory: MyConsoleApp
-      pr_merged: ${{ check.check.outputs.pr_merged }}
-      pr_label_has_safe_to_release: ${{ check.check.outputs.pr_label_has_safe_to_release }}
-      current_branch: ${{ check.check.outputs.current_branch }}
-      event_number: ${{ check.check.outputs.event_number }}
+      pr_merged: ${{ needs.check.outputs.pr_merged }}
+      pr_label_has_safe_to_release: ${{ needs.check.outputs.pr_label_has_safe_to_release }}
+      current_branch: ${{ needs.check.outputs.current_branch }}
+      event_number: ${{ needs.check.outputs.event_number }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
