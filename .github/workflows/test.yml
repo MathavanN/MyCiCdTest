@@ -58,7 +58,7 @@ jobs:
           export tag_patch=patch
           export default_semvar_bump=${tag_patch}
           export with_v=false
-          export release_branches=masterTest,Tets
+          export release_branches=master
 
           echo '*** Configuration ****'
 
