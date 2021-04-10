@@ -11,13 +11,41 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  once:
-    if: >
+  check:
+    if: > 
       ${{github.event.pull_request.merged == true &&
       contains(github.event.pull_request.labels.*.name, 'safe to release') }}
+    name: Check PR merged Status and Label
+    runs-on: ubuntu-latest
+    outputs:
+      pr_merged: ${{ steps.pr_status.outputs.PR_MERGED }}
+      pr_label_has_safe_to_release: ${{ steps.pr_status.outputs.PR_LABEL_HAS_SAFE_TO_RELEASE }}
+      current_branch: ${{ steps.pr_status.outputs.CURRENT_BRANCH }}
+      event_number: ${{ steps.pr_status.outputs.EVENT_NUMBER }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set PR Status
+        id: pr_status
+        run: |
+          echo ::set-output name=PR_MERGED::${github.event.pull_request.merged}
+          echo ::set-output name=PR_LABEL_HAS_SAFE_TO_RELEASE::${ contains(github.event.pull_request.labels.*.name, 'safe to release') }
+          echo ::set-output name=CURRENT_BRANCH::${GITHUB_REF#refs/*/}
+          echo ::set-output name=EVENT_NUMBER::${github.event.number}
+      - name: Check PR Status
+        run: |
+          echo ${{ steps.pr_status.outputs.PR_MERGED }}
+          echo ${{ steps.pr_status.outputs.PR_LABEL_HAS_SAFE_TO_RELEASE }}
+          echo ${{ steps.pr_status.outputs.CURRENT_BRANCH }}
+          echo ${{ steps.pr_status.outputs.EVENT_NUMBER }}
+  once:
     name: Create single release for all build_release
-    # The type of runner that the job will run on
+    needs: check
+    env:
+      working-directory: MyConsoleApp
+      pr_merged: ${{ check.check.outputs.pr_merged }}
+      pr_label_has_safe_to_release: ${{ check.check.outputs.pr_label_has_safe_to_release }}
+      current_branch: ${{ check.check.outputs.current_branch }}
+      event_number: ${{ check.check.outputs.event_number }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -33,15 +61,12 @@ jobs:
           export release_branches=master
 
           echo '*** Configuration ****'
+
+          echo "Working-driectory: ${{env.working-directory}}"
+          echo "PR Merged: ${{env.pr_merged}}"
+          echo "PR Label has safe to release: ${{env.pr_label_has_safe_to_release}}"
+          echo "Current Branch: ${{env.current_branch}}"
+          echo "Event Number: ${{env.event_number}}"
           echo "DEFAULT_BUMP: ${default_semvar_bump}"
           echo "WITH_V: ${with_v}"
           echo "RELEASE_BRANCHES: ${release_branches}"
-          echo "Test Current Branch: $(echo ${GITHUB_REF#refs/*/})"
-
-          export current_branch=$(git rev-parse -abbrev-ref HEAD)
-
-          echo "Current Branch: ${current_branch}"
-          echo ${{ github.event.number }},
-          echo ${{ github.event.workflow_run.event }},
-          echo ${{ github.event.pull_request.labels.*.name }},
-          echo ${{ github.event.pull_request.merged }}
