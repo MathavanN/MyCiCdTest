@@ -9,7 +9,7 @@ on:
     branches: [ master ]
     types: [closed, labeled]
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel test
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   check:
     if: > 
@@ -58,7 +58,7 @@ jobs:
           export tag_patch=patch
           export default_semvar_bump=${tag_patch}
           export with_v=false
-          export release_branches=master
+          export release_branches=masterTest,Tets
 
           echo '*** Configuration ****'
 
@@ -70,3 +70,21 @@ jobs:
           echo "DEFAULT_BUMP: ${default_semvar_bump}"
           echo "WITH_V: ${with_v}"
           echo "RELEASE_BRANCHES: ${release_branches}"
+
+          export release_branch_matched=false
+          IFS=',' read -ra branch <<< "$release_branches"
+          for b in "${branch[@]}"; do
+              echo "Is $b a match for ${current_branch}"
+              if [[ "${current_branch}" =~ $b ]]
+              then
+                release_branch_matched=true
+              fi
+          done
+
+          echo "Release Branch matched = ${release_branch_matched}"
+
+          if [ "${release_branch_matched}" = false ]; then
+            exit 0
+          else
+            echo "I can continue..."
+          fi
