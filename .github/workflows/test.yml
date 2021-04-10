@@ -25,19 +25,19 @@ jobs:
           fetch-depth: '0'
       - name: Run a multi-line script
         run: |
-          export tag_major = major
-          export tag_minor = minor
-          export tag_patch = patch
-          export default_semvar_bump = ${tag_patch}
-          export vith_v = false
-          export release_branchaes = master
+          export tag_major=major
+          export tag_minor=minor
+          export tag_patch=patch
+          export default_semvar_bump=${tag_patch}
+          export vith_v=false
+          export release_branchaes=master
 
           echo '*** Configuration ****'
           echo "\tDEFAULT_BUMP: ${default_semvar_bump}"
           echo "\tWITH_V: ${with_v}"
           echo "\tRELEASE_BRANCHES: ${release_branches}"
 
-          export current_branch = $(git rev-parse -abbrev-ref HEAD)
+          export current_branch=$(git rev-parse -abbrev-ref HEAD)
 
           echo "\t Current Branch: ${current_branch}"
           echo ${{ github.event.number }},
