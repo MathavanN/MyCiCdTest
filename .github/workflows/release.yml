@@ -52,9 +52,9 @@ jobs:
     steps:
       - name: Run a multi-line script
         run: |
-           if [ "${{env.pr_merged}}" = false ]; then
+           if [ ${{env.pr_merged}} = false ]; then
              echo "PR Not merged...."
-             exit 0
+             exit 1
            fi
       - uses: actions/checkout@v2
         with:
@@ -85,9 +85,9 @@ jobs:
     steps:
       - name: Run a multi-line script
         run: |
-           if [ "${{env.pr_label_has_safe_to_release}}" = false ]; then
+           if [ ${{env.pr_label_has_safe_to_release}} = false ]; then
              echo "PR not Labeled for safe to release ...."
-             exit 0
+             exit 1
            fi
       - uses: actions/checkout@v2
       - name: Create a GitHub release
