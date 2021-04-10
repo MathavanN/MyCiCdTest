@@ -48,6 +48,7 @@ jobs:
       new_tag: ${{ steps.tag_version.outputs.new_tag }}
       previous_tag: ${{ steps.tag_version.outputs.tag }}
       tag_part: ${{ steps.tag_version.outputs.part }}
+    if: ${{env.pr_merged}} == true
     runs-on: ubuntu-latest
     steps:
       - name: Run a multi-line script
