@@ -27,10 +27,10 @@ jobs:
       - name: Set PR Status
         id: pr_status
         run: |
-          echo ::set-output name=PR_MERGED::${github.event.pull_request.merged}
-          echo ::set-output name=PR_LABEL_HAS_SAFE_TO_RELEASE::${ contains(github.event.pull_request.labels.*.name, 'safe to release') }
+          echo ::set-output name=PR_MERGED::${{github.event.pull_request.merged}}
+          echo ::set-output name=PR_LABEL_HAS_SAFE_TO_RELEASE::${{ contains(github.event.pull_request.labels.*.name, 'safe to release') }}
           echo ::set-output name=CURRENT_BRANCH::${GITHUB_REF#refs/*/}
-          echo ::set-output name=EVENT_NUMBER::${github.event.number}
+          echo ::set-output name=EVENT_NUMBER::${{ github.event.number }}
       - name: Check PR Status
         run: |
           echo ${{ steps.pr_status.outputs.PR_MERGED }}
