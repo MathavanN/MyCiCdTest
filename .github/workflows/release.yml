@@ -6,22 +6,56 @@ name: Build and Release
 on:
   # Triggers the workflow on push or pull request events but only for the develop branch
   pull_request:
-    branches:
-      - master
-    types: [closed]
+    branches: [ master ]
+    types: [closed, labeled]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  once:
-    if: github.event.pull_request.merged == true
-    name: Create single release for all build_release
+  check:
+    name: Check PR merged Status and Label
     runs-on: ubuntu-latest
     outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      pr_merged: ${{ steps.pr_status.outputs.PR_MERGED }}
+      pr_label_has_safe_to_release: ${{ steps.pr_status.outputs.PR_LABEL_HAS_SAFE_TO_RELEASE }}
+      current_branch: ${{ steps.pr_status.outputs.CURRENT_BRANCH }}
+      event_number: ${{ steps.pr_status.outputs.EVENT_NUMBER }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set PR Status
+        id: pr_status
+        run: |
+          echo ::set-output name=PR_MERGED::${{github.event.pull_request.merged}}
+          echo ::set-output name=PR_LABEL_HAS_SAFE_TO_RELEASE::${{ contains(github.event.pull_request.labels.*.name, 'safe to release') }}
+          echo ::set-output name=CURRENT_BRANCH::${GITHUB_REF#refs/*/}
+          echo ::set-output name=EVENT_NUMBER::${{ github.event.number }}
+      - name: Check PR Status
+        run: |
+          echo ${{ steps.pr_status.outputs.PR_MERGED }}
+          echo ${{ steps.pr_status.outputs.PR_LABEL_HAS_SAFE_TO_RELEASE }}
+          echo ${{ steps.pr_status.outputs.CURRENT_BRANCH }}
+          echo ${{ steps.pr_status.outputs.EVENT_NUMBER }}
+  
+  tag: 
+    name: Create a tag
+    needs: check
+    env:
+      working-directory: MyConsoleApp
+      pr_merged: ${{ needs.check.outputs.pr_merged }}
+      pr_label_has_safe_to_release: ${{ needs.check.outputs.pr_label_has_safe_to_release }}
+      current_branch: ${{ needs.check.outputs.current_branch }}
+      event_number: ${{ needs.check.outputs.event_number }}
+    outputs:
       new_tag: ${{ steps.tag_version.outputs.new_tag }}
       previous_tag: ${{ steps.tag_version.outputs.tag }}
       tag_part: ${{ steps.tag_version.outputs.part }}
+    runs-on: ubuntu-latest
     steps:
+      - name: Run a multi-line script
+        run: |
+           if [ "${{env.pr_merged}}" = false ]; then
+             echo "PR Not merged...."
+             exit 0
+           fi
       - uses: actions/checkout@v2
         with:
           fetch-depth: '0'
@@ -34,32 +68,46 @@ jobs:
           TAG_CONTEXT: branch
           DEFAULT_BUMP: patch
           WITH_V: false
+  
+  release:
+    name: Create single release for all build_release
+    runs-on: ubuntu-latest
+    needs: [check, tag]
+    env:
+      working-directory: MyConsoleApp
+      pr_merged: ${{ needs.check.outputs.pr_merged }}
+      pr_label_has_safe_to_release: ${{ needs.check.outputs.pr_label_has_safe_to_release }}
+      new_tag: ${{ needs.tag.outputs.new_tag }}
+      previous_tag: ${{ needs.tag.outputs.tag }}
+      tag_part: ${{ needs.tag.outputs.part }}
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: Run a multi-line script
+        run: |
+           if [ "${{env.pr_label_has_safe_to_release}}" = false ]; then
+             echo "PR not Labeled for safe to release ...."
+             exit 0
+           fi
+      - uses: actions/checkout@v2
       - name: Create a GitHub release
         uses: actions/create-release@v1
         id: create_release
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
         with:
-          tag_name: ${{ steps.tag_version.outputs.new_tag }}
-          release_name: Release v${{ steps.tag_version.outputs.new_tag }}
+          tag_name: ${{ env.new_tag }}
+          release_name: Release v${{ env.new_tag }}
           body: CHANGELOG.md
-      - name: Print Tag Version
-        env:
-          NEW_TAG: ${{ steps.tag_version.outputs.new_tag }}
-          TAG: ${{ steps.tag_version.outputs.tag }}
-          PART: ${{ steps.tag_version.outputs.part }}
-        run: |
-          echo $NEW_TAG
-          echo $TAG
-          echo $PART
-
+      
   build:
     name: Create cross-platform release builds, and upload binaries
-    needs: once
+    needs: [tag, release]
     runs-on: ${{ matrix.os }}
     env:
       working-directory: MyConsoleApp
-      version: ${{ needs.once.outputs.new_tag }}
+      version: ${{ needs.tag.outputs.new_tag }}
+      upoad_url: ${{ needs.release.outputs.upload_url }}
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
@@ -69,6 +117,9 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 5.0.x
+      - name: Clean
+        run: dotnet clean && dotnet nuget locals all --clear
+        working-directory: ${{env.working-directory}}
       - name: Install dependencies
         run: dotnet restore
         working-directory: ${{env.working-directory}}
@@ -86,7 +137,7 @@ jobs:
       - name: Zip the asset into a zip file
         id: zip_asset
         run: |
-          7z a -tzip MyConsoleApp-${{ matrix.os }}-v${{ needs.once.outputs.new_tag }}.zip Release*
+          7z a -tzip MyConsoleApp-${{ matrix.os }}-v${{ env.version }}.zip Release*
         working-directory: ${{env.working-directory}}
       
       - name: List all files
@@ -99,7 +150,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
         with:
-          upload_url: ${{ needs.once.outputs.upload_url }}
-          asset_path: ${{env.working-directory}}/MyConsoleApp-${{ matrix.os }}-v${{ needs.once.outputs.new_tag }}.zip
-          asset_name: MyConsoleApp-${{ matrix.os }}-v${{ needs.once.outputs.new_tag }}.zip
+          upload_url: ${{ env.upoad_url }}
+          asset_path: ${{env.working-directory}}/MyConsoleApp-${{ matrix.os }}-v${{ env.version }}.zip
+          asset_name: MyConsoleApp-${{ matrix.os }}-v${{ env.version }}.zip
           asset_content_type: application/octet-stream
