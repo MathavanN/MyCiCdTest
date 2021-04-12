@@ -19,7 +19,7 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 5.0.x
+        dotnet-version: 5.0.201
     - name: Clean
       run: dotnet clean MyConsoleApp.sln --configuration Release && dotnet nuget locals all --clear
       working-directory: MyConsoleApp
