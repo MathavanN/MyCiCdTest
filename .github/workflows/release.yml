@@ -7,7 +7,7 @@ on:
   # Triggers the workflow on push or pull request events but only for the develop branch
   pull_request:
     branches: [ master ]
-    types: [closed, labeled]
+    types: [labeled]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -116,10 +116,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 5.0.x
-      - name: Clean
-        run: dotnet clean && dotnet nuget locals all --clear
-        working-directory: ${{env.working-directory}}
+          dotnet-version: 5.0.201
       - name: Install dependencies
         run: dotnet restore
         working-directory: ${{env.working-directory}}
