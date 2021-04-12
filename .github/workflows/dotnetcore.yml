@@ -21,7 +21,7 @@ jobs:
       with:
         dotnet-version: 5.0.x
     - name: Clean
-      run: dotnet clean /MyConsoleApp.sln --configuration Release && dotnet nuget locals all --clear
+      run: dotnet clean MyConsoleApp.sln --configuration Release && dotnet nuget locals all --clear
       working-directory: MyConsoleApp
     - name: Install dependencies
       run: dotnet restore
