@@ -50,16 +50,18 @@ jobs:
       tag_part: ${{ steps.tag_version.outputs.part }}
     runs-on: ubuntu-latest
     steps:
-      - name: Run a multi-line script
+      - name: PR Status Output
+        id: tag_stage
         run: |
-           if [ ${{env.pr_merged}} = false ]; then
-             echo "PR Not merged...."
-             exit 1
-           fi
+          echo ::set-output name=TAG_CAN_CREATE::${{ env.pr_merged }}
       - uses: actions/checkout@v2
         with:
           fetch-depth: '0'
+      - name: Check PR Status Output
+        run: |
+          echo ${{ steps.tag_stage.outputs.TAG_CAN_CREATE }}
       - name: Create a tag
+        if: steps.tag_stage.outputs.TAG_CAN_CREATE == true
         id: tag_version
         uses: anothrNick/github-tag-action@1.35.0
         env:
