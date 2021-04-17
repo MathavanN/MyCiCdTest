@@ -61,7 +61,7 @@ jobs:
         run: |
           echo ${{ steps.tag_stage.outputs.TAG_CAN_CREATE }}
       - name: Create a tag
-        if: steps.tag_stage.outputs.TAG_CAN_CREATE == true
+        if: steps.tag_stage.outputs.TAG_CAN_CREATE == 'true'
         id: tag_version
         uses: anothrNick/github-tag-action@1.35.0
         env:
